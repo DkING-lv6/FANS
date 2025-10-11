@@ -1,4 +1,4 @@
-## NeurIPS 2025 FANS: A Flatness-Aware Network Structure for Generalization in Offline Reinforcement Learning
+# NeurIPS 2025 FANS: A Flatness-Aware Network Structure for Generalization in Offline Reinforcement Learning
 # RUN FANS
 
 ```bash
