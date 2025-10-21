@@ -6,7 +6,7 @@ import uuid
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
-from simba_baseunity import MLPBlock, ResidualBlock, NormalTanhPolicy, LinearCritic
+from fans_baseunity import MLPBlock, ResidualBlock, NormalTanhPolicy, LinearCritic
 
 import d4rl
 import gym
