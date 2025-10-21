@@ -10,11 +10,9 @@ class MLPBlock(nn.Module):
         self.hidden_dim = hidden_dim
         self.dtype = dtype
 
-        # 初始化全连接层
         self.fc1 = nn.Linear(hidden_dim, hidden_dim)
         self.fc2 = nn.Linear(hidden_dim, hidden_dim)
 
-        # 初始化权重
         nn.init.orthogonal_(self.fc1.weight, gain=torch.sqrt(torch.tensor(2.0)))
         nn.init.orthogonal_(self.fc2.weight, gain=torch.sqrt(torch.tensor(2.0)))
 
@@ -40,11 +38,9 @@ class ResidualBlock(nn.Module):
         # LayerNorm
         self.layer_norm = nn.LayerNorm(hidden_dim)
 
-        # 初始化全连接层
         self.fc1 = nn.Linear(hidden_dim, hidden_dim * 1)
         self.fc2 = nn.Linear(hidden_dim * 1, hidden_dim)
 
-        # 初始化权重
         if self.active_type == "gaussian":
             nn.init.kaiming_normal_(self.fc1.weight.data.normal_(mean=0.0, std=0.02))
             nn.init.kaiming_normal_(self.fc2.weight.data.normal_(mean=0.0, std=0.02))
@@ -81,11 +77,9 @@ class NormalTanhPolicy(nn.Module):
         self.log_std_max = log_std_max
         self.dtype = dtype
 
-        # 均值网络
         self.mean_fc = nn.Linear(256, action_dim)
         nn.init.orthogonal_(self.mean_fc.weight, gain=kernel_init_scale)
 
-        # 标准差网络
         if self.state_dependent_std:
             self.log_std_fc = nn.Linear(256, action_dim)
             nn.init.orthogonal_(self.log_std_fc.weight, gain=kernel_init_scale)
@@ -93,24 +87,19 @@ class NormalTanhPolicy(nn.Module):
             self.log_std = nn.Parameter(torch.zeros(action_dim))
 
     def forward(self, inputs: torch.Tensor, temperature: float = 1.0) -> td.Distribution:
-        # 计算均值
         means = self.mean_fc(inputs)
 
-        # 计算标准差
         if self.state_dependent_std:
             log_stds = self.log_std_fc(inputs)
         else:
             log_stds = self.log_std
 
-        # 限制标准差范围
         log_stds = self.log_std_min + (self.log_std_max - self.log_std_min) * 0.5 * (
                 1 + torch.tanh(log_stds)
         )
 
-        # 创建正态分布
         dist = td.Normal(loc=means, scale=torch.exp(log_stds) * temperature)
 
-        # 使用 Tanh 变换
         dist = td.TransformedDistribution(dist, td.transforms.TanhTransform())
 
         return dist
@@ -122,7 +111,6 @@ class LinearCritic(nn.Module):
         self.kernel_init_scale = kernel_init_scale
         self.dtype = dtype
 
-        # 初始化全连接层
         self.fc = nn.Linear(256, 1)
         nn.init.orthogonal_(self.fc.weight, gain=kernel_init_scale)
 
